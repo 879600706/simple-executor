@@ -1,0 +1,77 @@
+[
+  {
+    "jobName": "ListExpertInfoJob",
+    "jobClass": "com.bo.job.ListExpertInfoJob"
+  },
+  {
+    "jobName": "ListExportEnterDatabaseInfoDTOJob",
+    "jobClass": "com.bo.job.ListExportEnterDatabaseInfoDTOJob",
+    "dependsOn": [
+      "ListExpertInfoJob"
+    ]
+  },
+  {
+    "jobName": "ListExpertMajorJob",
+    "jobClass": "com.bo.job.ListExpertMajorJob",
+    "dependsOn": [
+      "ListExportEnterDatabaseInfoDTOJob"
+    ]
+  },
+  {
+    "jobName": "ListExpertCertJob",
+    "jobClass": "com.bo.job.ListExpertCertJob",
+    "dependsOn": [
+      "ListExpertInfoJob"
+    ]
+  },
+  {
+    "jobName": "ListCollectManageByIdsJob",
+    "jobClass": "com.bo.job.ListCollectManageByIdsJob",
+    "dependsOn": [
+      "ListExpertInfoJob"
+    ]
+  },
+  {
+    "jobName": "ListExportRegCategoryCertJob",
+    "jobClass": "com.bo.job.ListExportRegCategoryCertJob",
+    "dependsOn": [
+      "ListExpertMajorJob"
+    ]
+  },
+  {
+    "jobName": "ListExportProTitleCertJob",
+    "jobClass": "com.bo.job.ListExportProTitleCertJob",
+    "dependsOn": [
+      "ListExpertMajorJob"
+    ]
+  },
+  {
+    "jobName": "ListExportCompanyRelJob",
+    "jobClass": "com.bo.job.ListExportCompanyRelJob",
+    "dependsOn": [
+      "ListExpertMajorJob"
+    ]
+  },
+  {
+    "jobName": "ListExportCompanyJob",
+    "jobClass": "com.bo.job.ListExportCompanyJob",
+    "dependsOn": [
+      "ListExportCompanyRelJob"
+    ]
+  },
+  {
+    "jobName": "BuildExcelDataJob",
+    "jobClass": "com.bo.job.BuildExcelDataJob",
+    "dependsOn": [
+      "ListExpertInfoJob",
+      "ListExportEnterDatabaseInfoDTOJob",
+      "ListExportProTitleCertJob",
+      "ListExportRegCategoryCertJob",
+      "ListExportCompanyRelJob",
+      "ListExportCompanyJob",
+      "ListExpertMajorJob",
+      "ListExpertCertJob",
+      "ListCollectManageByIdsJob"
+    ]
+  }
+]
