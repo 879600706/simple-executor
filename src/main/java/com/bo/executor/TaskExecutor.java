@@ -1,6 +1,5 @@
 package com.bo.executor;
 
-import cn.hutool.core.thread.NamedThreadFactory;
 import com.bo.executor.data.JobData;
 import com.bo.executor.template.AsyncJobTemplate;
 import lombok.extern.slf4j.Slf4j;
@@ -9,26 +8,13 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 @Slf4j
 public class TaskExecutor {
-
-    private final static Integer coreSize = Runtime.getRuntime().availableProcessors() * 2;
-
-    private final static ThreadPoolExecutor taskPool = new ThreadPoolExecutor(coreSize,
-            coreSize,
-            0L,
-            TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(1024),
-            new NamedThreadFactory("job-execute-t-", false),
-            (r, executor) -> {
-                throw new RuntimeException("系统繁忙请稍后再试");
-            });
 
     public static void startTask(String taskName, TaskContext taskContext) {
         TaskMetaData taskMetaData = TaskMetaData.getInstance(taskName);
@@ -42,6 +28,7 @@ public class TaskExecutor {
     }
 
     private static void runTask(String jobName, TaskContext taskContext, TaskMetaData taskMetaData) {
+        ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
         String taskName = taskMetaData.getTaskName();
         if (taskContext.isJobDone(jobName)) {
             log.info("taskName {} jobName {} already run ", taskName, jobName);
@@ -80,7 +67,7 @@ public class TaskExecutor {
         final JobData finalJobData = jobData;
         CompletableFuture.supplyAsync(() -> {
                     return startTasTemplate.execute(finalJobData);
-                }, taskPool)
+                }, executorService)
                 .thenAcceptAsync((c) -> {
                     log.info("taskName {} jobName {} execute done", taskName, jobName);
                     taskContext.saveJobData(jobName, c);
@@ -95,7 +82,7 @@ public class TaskExecutor {
                             taskContext.end();
                         }
                     }
-                }, taskPool).exceptionally((e) -> {
+                }, executorService).exceptionally((e) -> {
                     log.error("taskName {} jobName {} execute error", taskName, jobName, e);
                     taskContext.jobDone(jobName);
                     synchronized (taskContext) {
